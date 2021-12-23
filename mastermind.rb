@@ -1,7 +1,9 @@
 require 'pry-byebug'
 
 class Game
-  COLORS = ["red", "yellow", "green", "blue", "white", "black"]
+attr_reader :role
+
+COLORS = ["red", "yellow", "green", "blue", "white", "black"]
   
   def initialize
     @code = []
@@ -10,20 +12,32 @@ class Game
   end
 
   def play
-    generate_code
+    choose_role
+    code_breaker if role == 1
+    code_maker if role == 2
+  end
 
-      5.times do
-        round
-        break if game_won?
-      end
+  def code_breaker
+    generate_code
+    # change to 12 rounds when code is complete
+    5.times do
+      round
+      break if game_won?
+    end
+  end
+
+  def choose_role
+    puts "Enter 1 to be the code-breaker or 2 to be the code-maker."
+    @role = gets.chomp.to_i
   end
 
   def generate_code
     4.times do
       @code << COLORS.sample
     end
-    p @code
     @code_clone = @code.clone
+    # delete when code is complete
+    p @code
   end
 
   def solicit_guess
@@ -31,8 +45,7 @@ class Game
     @guess.clear
     @code_clone.clear
     puts "Enter your guess:"
-    @guess << gets.chomp.split(" ")
-    @guess.flatten!
+    @guess << gets.chomp.split(" ").flatten!
     @guess_clone = @guess.clone
   end
 

@@ -4,6 +4,7 @@ class Game
 attr_reader :role
 
 COLORS = ["red", "yellow", "green", "blue", "white", "black"]
+NUMBERS = [1, 2, 3, 4, 5, 6]
   
   def initialize
     @code = []
@@ -21,7 +22,7 @@ COLORS = ["red", "yellow", "green", "blue", "white", "black"]
     generate_code
     # change to 12 rounds when code is complete
     5.times do
-      round
+      play_round
       break if game_won?
     end
   end
@@ -41,12 +42,16 @@ COLORS = ["red", "yellow", "green", "blue", "white", "black"]
   end
 
   def solicit_guess
+    puts "Enter your guess:"
+    @guess << gets.chomp.split(" ")
+    @guess.flatten!
+    @guess_clone = @guess.clone
+  end
+
+  def clear
     @pegs.clear
     @guess.clear
     @code_clone.clear
-    puts "Enter your guess:"
-    @guess << gets.chomp.split(" ").flatten!
-    @guess_clone = @guess.clone
   end
 
   def red_pegs?
@@ -55,6 +60,7 @@ COLORS = ["red", "yellow", "green", "blue", "white", "black"]
         @pegs << "RED"
         @code_clone[idx] = "x"
         @guess_clone[idx] = "z"
+        p @code_clone
       end
     end
   end
@@ -62,7 +68,15 @@ COLORS = ["red", "yellow", "green", "blue", "white", "black"]
   def white_pegs?
     @code_clone.each_with_index do |val, idx|
       if (@guess_clone.any?(val))
-        @pegs << "WHITE"
+        # if same color is present in code more than once, and guess contains that
+        # color in the wrong position but only once, # of white pegs awarded = # of
+        # times color present in code. to prevent this:
+        if @code_clone.count(val) > @guess_clone.count(val) 
+          @pegs << "WHITE"
+          @guess_clone[@guess_clone.index(val)] = "z"
+        else
+          @pegs << "WHITE"
+        end
       end
     end
   end
@@ -75,7 +89,8 @@ COLORS = ["red", "yellow", "green", "blue", "white", "black"]
     puts " "
   end
 
-  def round
+  def play_round
+    clear
     solicit_guess
     @code_clone = @code.clone
     give_feedback
@@ -86,6 +101,34 @@ COLORS = ["red", "yellow", "green", "blue", "white", "black"]
       puts "You win! You've guessed the code."
       return true
     end
+  end
+
+  def code_maker
+    choose_code
+
+    12.times do
+      clear
+      computer_guess
+      @code_clone = @code.clone
+      give_feedback
+      break if game_won?
+    end
+  end
+
+  def choose_code
+    puts "Enter the code that you want the computer to break:"
+    @code << gets.chomp.split(" ")
+    @code.flatten!
+    @code_clone = @code.clone
+  end
+
+  def computer_guess
+    @guess = ["red", "white", "blue", "black"]
+    @guess_clone = @guess.clone
+  end
+
+  def intelligence
+    
   end
 end
 

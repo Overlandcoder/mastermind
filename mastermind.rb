@@ -1,24 +1,8 @@
 require 'pry-byebug'
 
-class Game
-attr_reader :role, :pegs
-
-COLORS = ["red", "yellow", "green", "blue", "white", "black"]
-NUMBERS = [1, 2, 3, 4, 5, 6]
-  
-  def initialize
-    @code = []
-    @guess = []
-    @pegs = []
-  end
-
-  def play
-    choose_role
-    code_breaker if role == 1
-    code_maker if role == 2
-  end
-
+module GameRules
   def code_breaker
+    player = CodeBreaker.new
     generate_code
     # change to 12 rounds when code is complete
     5.times do
@@ -27,34 +11,8 @@ NUMBERS = [1, 2, 3, 4, 5, 6]
     end
   end
 
-  def choose_role
-    puts "Enter 1 to be the code-breaker or 2 to be the code-maker."
-    @role = gets.chomp.to_i
-    if !((@role == 1) || (@role == 2))
-      puts "Invalid entry."
-      choose_role
-    end
-  end
-
-  def generate_code
-    4.times do
-      @code << COLORS.sample
-    end
-    @code_clone = @code.clone
-    # delete when code is complete
-    p @code
-  end
-
-  def solicit_guess
-    puts "Enter your guess:"
-    @guess << gets.chomp.split(" ")
-    @guess.flatten!
-    @guess_clone = @guess.clone
-  end
-
   def clear
     @pegs.clear
-    @guess.clear
     @code_clone.clear
   end
 
@@ -93,13 +51,6 @@ NUMBERS = [1, 2, 3, 4, 5, 6]
     puts " "
   end
 
-  def play_round
-    clear
-    solicit_guess
-    @code_clone = @code.clone
-    give_feedback
-  end
-
   def game_won?
     if (@pegs == ["RED", "RED", "RED", "RED"])
       puts "You win! You've guessed the code."
@@ -117,42 +68,111 @@ NUMBERS = [1, 2, 3, 4, 5, 6]
       break if game_won?
     end
   end
+end
 
-  def choose_code
-    puts "Enter the code that you want the computer to break:"
-    @code << gets.chomp.split(" ")
-    @code.flatten!
+class Game
+include GameRules
+include Display
+
+attr_reader :role, :pegs
+
+COLORS = ["red", "yellow", "green", "blue", "white", "black"]
+  
+  def initialize
+    @code = []
+    @pegs = []
+  end
+
+  def play
+    choose_role
+    code_breaker if role == 1
+    code_maker if role == 2
+  end
+
+  def choose_role
+    puts "Enter 1 to be the code-breaker or 2 to be the code-maker."
+    @role = gets.chomp.to_i
+    if !((@role == 1) || (@role == 2))
+      puts "Invalid entry."
+      choose_role
+    end
+  end 
+end
+
+class CodeBreaker
+include GameRules
+include Display
+
+attr_reader :guess
+
+  def initialize
+    @guess = []
+  end
+
+  def play_round
+    clear
+    player.solicit_guess
     @code_clone = @code.clone
+    give_feedback
+  end
+
+  def generate_code
+    4.times do
+      @code << COLORS.sample
+    end
+    @code_clone = @code.clone
+    # delete when code is complete
     p @code
   end
-
-  def computer_guess
-    first_level
-  end
-
-  def first_level(n = 0)
-    4.times { @guess << COLORS[n] }
-    p @guess
+  
+  def solicit_guess
+    puts "Enter your guess:"
+    @guess << gets.chomp.split(" ")
+    @guess.flatten!
     @guess_clone = @guess.clone
-    if pegs == 0
-      clear
-      first_level(n + 1)
-    end
-    give_feedback
-    second_level(n) unless game_won?
   end
+  
+end
 
-  def second_level(n)
-    n = n + 1
-    (4 - pegs.count).times { @guess << COLORS[n] }
-    p @guess
-    @guess_clone = @guess.clone
-    if !(count_pegs > pegs.count)
-      clear
-      second_level(n + 1)
-    end
-    give_feedback
+class CodeMaker
+include GameRules
+include Display
+
+def choose_code
+  puts "Enter the code that you want the computer to break:"
+  @code << gets.chomp.split(" ")
+  @code.flatten!
+  @code_clone = @code.clone
+  p @code
+end
+
+def computer_guess
+  first_level
+end
+
+def first_level(n = 0)
+  4.times { @guess << COLORS[n] }
+  p @guess
+  @guess_clone = @guess.clone
+  if pegs == 0
+    clear
+    first_level(n + 1)
   end
+  give_feedback
+  second_level(n) unless game_won?
+end
+
+def second_level(n)
+  n = n + 1
+  (4 - pegs.count).times { @guess << COLORS[n] }
+  p @guess
+  @guess_clone = @guess.clone
+  if !(count_pegs > pegs.count)
+    clear
+    second_level(n + 1)
+  end
+  give_feedback
+end
 end
 
 game = Game.new

@@ -1,7 +1,7 @@
 require 'pry-byebug'
 
 class Game
-attr_reader :role
+attr_reader :role, :pegs
 
 COLORS = ["red", "yellow", "green", "blue", "white", "black"]
 NUMBERS = [1, 2, 3, 4, 5, 6]
@@ -30,6 +30,10 @@ NUMBERS = [1, 2, 3, 4, 5, 6]
   def choose_role
     puts "Enter 1 to be the code-breaker or 2 to be the code-maker."
     @role = gets.chomp.to_i
+    if !((@role == 1) || (@role == 2))
+      puts "Invalid entry."
+      choose_role
+    end
   end
 
   def generate_code
@@ -68,9 +72,9 @@ NUMBERS = [1, 2, 3, 4, 5, 6]
   def white_pegs?
     @code_clone.each_with_index do |val, idx|
       if (@guess_clone.any?(val))
-        # if same color is present in code more than once, and guess contains that
+        # If same color is present in code more than once, and guess contains that
         # color in the wrong position but only once, # of white pegs awarded = # of
-        # times color present in code. to prevent this:
+        # times color present in code. To prevent this:
         if @code_clone.count(val) > @guess_clone.count(val) 
           @pegs << "WHITE"
           @guess_clone[@guess_clone.index(val)] = "z"
@@ -108,9 +112,8 @@ NUMBERS = [1, 2, 3, 4, 5, 6]
 
     12.times do
       clear
-      computer_guess
       @code_clone = @code.clone
-      give_feedback
+      computer_guess
       break if game_won?
     end
   end
@@ -120,15 +123,35 @@ NUMBERS = [1, 2, 3, 4, 5, 6]
     @code << gets.chomp.split(" ")
     @code.flatten!
     @code_clone = @code.clone
+    p @code
   end
 
   def computer_guess
-    @guess = ["red", "white", "blue", "black"]
-    @guess_clone = @guess.clone
+    first_level
   end
 
-  def intelligence
-    
+  def first_level(n = 0)
+    4.times { @guess << COLORS[n] }
+    p @guess
+    @guess_clone = @guess.clone
+    if pegs == 0
+      clear
+      first_level(n + 1)
+    end
+    give_feedback
+    second_level(n) unless game_won?
+  end
+
+  def second_level(n)
+    n = n + 1
+    (4 - pegs.count).times { @guess << COLORS[n] }
+    p @guess
+    @guess_clone = @guess.clone
+    if !(count_pegs > pegs.count)
+      clear
+      second_level(n + 1)
+    end
+    give_feedback
   end
 end
 

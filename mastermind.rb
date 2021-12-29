@@ -1,18 +1,16 @@
 require 'pry-byebug'
 
 module GameRules
+COLORS = ["red", "yellow", "green", "blue", "white", "black"]
+
   def code_breaker
     player = CodeBreaker.new
-    generate_code
-    # change to 12 rounds when code is complete
-    5.times do
-      play_round
-      break if game_won?
-    end
+    player.rounds
   end
 
   def clear
     @pegs.clear
+    @guess.clear
     @code_clone.clear
   end
 
@@ -22,7 +20,6 @@ module GameRules
         @pegs << "RED"
         @code_clone[idx] = "x"
         @guess_clone[idx] = "z"
-        p @code_clone
       end
     end
   end
@@ -47,8 +44,10 @@ module GameRules
     red_pegs?
     white_pegs?
     puts " "
+    p @pegs
     puts @pegs.shuffle.join(" ")
     puts " "
+    p @pegs
   end
 
   def game_won?
@@ -72,16 +71,8 @@ end
 
 class Game
 include GameRules
-include Display
 
-attr_reader :role, :pegs
-
-COLORS = ["red", "yellow", "green", "blue", "white", "black"]
-  
-  def initialize
-    @code = []
-    @pegs = []
-  end
+attr_reader :role
 
   def play
     choose_role
@@ -101,19 +92,24 @@ end
 
 class CodeBreaker
 include GameRules
-include Display
 
-attr_reader :guess
+attr_reader :guess, :pegs
 
   def initialize
+    @code = []
     @guess = []
+    @pegs = []
+    generate_code
   end
 
-  def play_round
-    clear
-    player.solicit_guess
-    @code_clone = @code.clone
-    give_feedback
+  def rounds
+    12.times do
+      clear
+      solicit_guess
+      @code_clone = @code.clone
+      give_feedback
+      break if game_won?
+    end
   end
 
   def generate_code
@@ -136,7 +132,6 @@ end
 
 class CodeMaker
 include GameRules
-include Display
 
 def choose_code
   puts "Enter the code that you want the computer to break:"

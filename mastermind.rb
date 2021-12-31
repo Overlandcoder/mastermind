@@ -49,10 +49,7 @@ COLORS = ["red", "yellow", "green", "blue", "white", "black"]
   end
 
   def game_won?
-    if (@pegs == ["RED", "RED", "RED", "RED"])
-      "You win! You've guessed the code."
-      return true
-    end
+    @pegs == ["RED", "RED", "RED", "RED"]
   end
 
   def code_maker

@@ -44,28 +44,20 @@ COLORS = ["red", "yellow", "green", "blue", "white", "black"]
     red_pegs?
     white_pegs?
     puts " "
-    p @pegs
     puts @pegs.shuffle.join(" ")
     puts " "
-    p @pegs
   end
 
   def game_won?
     if (@pegs == ["RED", "RED", "RED", "RED"])
-      puts "You win! You've guessed the code."
+      "You win! You've guessed the code."
       return true
     end
   end
 
   def code_maker
-    choose_code
-
-    12.times do
-      clear
-      @code_clone = @code.clone
-      computer_guess
-      break if game_won?
-    end
+    computer = CodeMaker.new
+    computer.begin
   end
 end
 
@@ -93,7 +85,7 @@ end
 class CodeBreaker
 include GameRules
 
-attr_reader :guess, :pegs
+#attr_reader :guess, :pegs
 
   def initialize
     @code = []
@@ -103,12 +95,15 @@ attr_reader :guess, :pegs
   end
 
   def rounds
-    12.times do
+    5.times do
       clear
       solicit_guess
       @code_clone = @code.clone
       give_feedback
-      break if game_won?
+      if game_won?
+        puts "You've guessed the code!"
+        break
+      end
     end
   end
 
@@ -133,41 +128,63 @@ end
 class CodeMaker
 include GameRules
 
-def choose_code
-  puts "Enter the code that you want the computer to break:"
-  @code << gets.chomp.split(" ")
-  @code.flatten!
-  @code_clone = @code.clone
-  p @code
-end
+attr_reader :pegs
 
-def computer_guess
-  first_level
-end
-
-def first_level(n = 0)
-  4.times { @guess << COLORS[n] }
-  p @guess
-  @guess_clone = @guess.clone
-  if pegs == 0
-    clear
-    first_level(n + 1)
+  def initialize
+    @code = []
+    @guess = []
+    @pegs = []
   end
-  give_feedback
-  second_level(n) unless game_won?
-end
 
-def second_level(n)
-  n = n + 1
-  (4 - pegs.count).times { @guess << COLORS[n] }
-  p @guess
-  @guess_clone = @guess.clone
-  if !(count_pegs > pegs.count)
-    clear
-    second_level(n + 1)
+  def begin
+    choose_code
+
+    12.times do
+      clear
+      @code_clone = @code.clone
+      computer_guess
+      if game_won?
+        puts "The computer has guessed the code."
+        break
+      end
+    end
   end
-  give_feedback
-end
+
+  def choose_code
+    puts "Enter the code that you want the computer to break:"
+    @code << gets.chomp.split(" ")
+    @code.flatten!
+    @code_clone = @code.clone
+    p @code
+  end
+
+  def computer_guess
+    first_level
+  end
+
+  def first_level(n = 0)
+    4.times { @guess << COLORS[n] }
+    p @guess
+    @guess_clone = @guess.clone
+    if pegs == 0
+      clear
+      first_level(n + 1)
+    end
+    give_feedback
+    second_level(n) unless game_won?
+  end
+
+  def second_level(n)
+    n = n + 1
+    (4 - pegs.count).times { @guess << COLORS[n] }
+    p @guess
+    @guess_clone = @guess.clone
+    if !(count_pegs > pegs.count)
+      clear
+      second_level(n + 1)
+    end
+    give_feedback
+  end
 end
 
 game = Game.new

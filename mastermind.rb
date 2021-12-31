@@ -172,15 +172,17 @@ attr_reader :pegs
   end
 
   def second_level(n)
+    @guess.clear
+    pegs.count.times { @guess << COLORS[n] }
     n = n + 1
     (4 - pegs.count).times { @guess << COLORS[n] }
     p @guess
     @guess_clone = @guess.clone
+    give_feedback
     if !(count_pegs > pegs.count)
       clear
       second_level(n + 1)
     end
-    give_feedback
   end
 end
 

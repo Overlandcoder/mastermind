@@ -1,7 +1,7 @@
 require 'pry-byebug'
 
 module GameRules
-  COLORS = %w(red yellow green blue white black).freeze
+  COLORS = %w[red yellow green blue white black].freeze
 
   def code_breaker
     player = CodeBreaker.new
@@ -15,39 +15,35 @@ module GameRules
   end
 
   def red_pegs?
-    @code.each_with_index do |val, idx|
-      if @code[idx] == @guess[idx]
-        @pegs << "RED"
-        @code_clone[idx] = "x"
-        @guess_clone[idx] = "z"
-      end
+    @code.each_with_index do |_val, idx|
+      next unless @code[idx] == @guess[idx]
+
+      @pegs << 'RED'
+      @code_clone[idx] = 'x'
+      @guess_clone[idx] = 'z'
     end
   end
 
   def white_pegs?
-    @code_clone.each_with_index do |val, idx|
-      if @guess_clone.any?(val)
-        # If same color is present in code more than once, and the guess contains that
-        # color in the wrong position but only once, # of white pegs awarded = # of
-        # times color present in code. To prevent this:
-        if @code_clone.count(val) > @guess_clone.count(val)
-          @pegs << "WHITE"
-          @guess_clone[@guess_clone.index(val)] = "z"
-        else
-          @pegs << "WHITE"
-        end
-      end
+    @code_clone.each_with_index do |val, _idx|
+      next unless @guess_clone.any?(val)
+
+      # If same color is present in code more than once, and the guess contains that
+      # color in the wrong position but only once, # of white pegs awarded = # of
+      # times color present in code. To prevent this:
+      @pegs << 'WHITE'
+      @guess_clone[@guess_clone.index(val)] = 'z' if @code_clone.count(val) > @guess_clone.count(val)
     end
   end
 
   def give_feedback
     red_pegs?
     white_pegs?
-    puts "\n#{@pegs.shuffle.join(" ")}\n "
+    puts "\n#{@pegs.shuffle.join(' ')}\n "
   end
 
   def game_won?
-    @pegs == %w(RED RED RED RED)
+    @pegs == %w[RED RED RED RED]
   end
 
   def code_maker
@@ -68,11 +64,11 @@ class Game
   end
 
   def choose_role
-    puts "Enter 1 to be the code-breaker or 2 to be the code-maker."
+    puts 'Enter 1 to be the code-breaker or 2 to be the code-maker.'
     @role = gets.chomp.to_i
     return if (@role == 1) || (@role == 2)
 
-    puts "Invalid entry."
+    puts 'Invalid entry.'
     choose_role
   end
 end
@@ -112,8 +108,8 @@ class CodeBreaker
   end
 
   def solicit_guess
-    puts "Enter your guess:"
-    @guess << gets.chomp.split(" ")
+    puts 'Enter your guess:'
+    @guess << gets.chomp.split(' ')
     @guess.flatten!
     @guess_clone = @guess.clone
   end
@@ -138,15 +134,15 @@ class CodeMaker
       @code_clone = @code.clone
       computer_guess
       if game_won?
-        puts "The computer has guessed the code."
+        puts 'The computer has guessed the code.'
         break
       end
     end
   end
 
   def choose_code
-    puts "Enter the code that you want the computer to break:"
-    @code << gets.chomp.split(" ")
+    puts 'Enter the code that you want the computer to break:'
+    @code << gets.chomp.split(' ')
     @code.flatten!
     @code_clone = @code.clone
     p @code

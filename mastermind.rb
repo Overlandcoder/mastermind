@@ -1,7 +1,7 @@
 require 'pry-byebug'
 
 module GameRules
-COLORS = ["red", "yellow", "green", "blue", "white", "black"]
+  COLORS = %w(red yellow green blue white black).freeze
 
   def code_breaker
     player = CodeBreaker.new
@@ -16,7 +16,7 @@ COLORS = ["red", "yellow", "green", "blue", "white", "black"]
 
   def red_pegs?
     @code.each_with_index do |val, idx|
-      if (@code[idx] == @guess[idx])
+      if @code[idx] == @guess[idx]
         @pegs << "RED"
         @code_clone[idx] = "x"
         @guess_clone[idx] = "z"
@@ -26,11 +26,11 @@ COLORS = ["red", "yellow", "green", "blue", "white", "black"]
 
   def white_pegs?
     @code_clone.each_with_index do |val, idx|
-      if (@guess_clone.any?(val))
-        # If same color is present in code more than once, and guess contains that
+      if @guess_clone.any?(val)
+        # If same color is present in code more than once, and the guess contains that
         # color in the wrong position but only once, # of white pegs awarded = # of
         # times color present in code. To prevent this:
-        if @code_clone.count(val) > @guess_clone.count(val) 
+        if @code_clone.count(val) > @guess_clone.count(val)
           @pegs << "WHITE"
           @guess_clone[@guess_clone.index(val)] = "z"
         else
@@ -43,13 +43,11 @@ COLORS = ["red", "yellow", "green", "blue", "white", "black"]
   def give_feedback
     red_pegs?
     white_pegs?
-    puts " "
-    puts @pegs.shuffle.join(" ")
-    puts " "
+    puts "\n#{@pegs.shuffle.join(" ")}\n "
   end
 
   def game_won?
-    @pegs == ["RED", "RED", "RED", "RED"]
+    @pegs == %w(RED RED RED RED)
   end
 
   def code_maker
@@ -59,9 +57,9 @@ COLORS = ["red", "yellow", "green", "blue", "white", "black"]
 end
 
 class Game
-include GameRules
+  include GameRules
 
-attr_reader :role
+  attr_reader :role
 
   def play
     choose_role
@@ -72,17 +70,17 @@ attr_reader :role
   def choose_role
     puts "Enter 1 to be the code-breaker or 2 to be the code-maker."
     @role = gets.chomp.to_i
-    if !((@role == 1) || (@role == 2))
-      puts "Invalid entry."
-      choose_role
-    end
-  end 
+    return if (@role == 1) || (@role == 2)
+
+    puts "Invalid entry."
+    choose_role
+  end
 end
 
 class CodeBreaker
-include GameRules
+  include GameRules
 
-#attr_reader :guess, :pegs
+  # attr_reader :guess, :pegs
 
   def initialize
     @code = []
@@ -112,20 +110,19 @@ include GameRules
     # delete when code is complete
     p @code
   end
-  
+
   def solicit_guess
     puts "Enter your guess:"
     @guess << gets.chomp.split(" ")
     @guess.flatten!
     @guess_clone = @guess.clone
   end
-  
 end
 
 class CodeMaker
-include GameRules
+  include GameRules
 
-attr_reader :pegs
+  attr_reader :pegs
 
   def initialize
     @code = []
@@ -159,30 +156,30 @@ attr_reader :pegs
     first_level
   end
 
-  def first_level(n = 0)
-    4.times { @guess << COLORS[n] }
+  def first_level(num = 0)
+    4.times { @guess << COLORS[num] }
     p @guess
     @guess_clone = @guess.clone
-    if pegs == 0
+    if pegs.zero?
       clear
-      first_level(n + 1)
+      first_level(num + 1)
     end
     give_feedback
-    second_level(n) unless game_won?
+    second_level(num) unless game_won?
   end
 
-  def second_level(n)
+  def second_level(num)
     @guess.clear
-    pegs.count.times { @guess << COLORS[n] }
-    n = n + 1
-    (4 - pegs.count).times { @guess << COLORS[n] }
+    pegs.count.times { @guess << COLORS[num] }
+    num += 1
+    (4 - pegs.count).times { @guess << COLORS[num] }
     p @guess
     @guess_clone = @guess.clone
     give_feedback
-    if !(count_pegs > pegs.count)
-      clear
-      second_level(n + 1)
-    end
+    return unless count_pegs <= pegs.count
+
+    clear
+    second_level(num + 1)
   end
 end
 

@@ -57,8 +57,12 @@ class Game
 
   attr_reader :role
 
-  def play
+  def initialize
     choose_role
+    play
+  end
+
+  def play
     code_breaker if role == 1
     code_maker if role == 2
   end
@@ -179,5 +183,4 @@ class CodeMaker
   end
 end
 
-game = Game.new
-game.play
+Game.new

@@ -3,11 +3,6 @@ require 'pry-byebug'
 module GameRules
   COLORS = %w[red yellow green blue white black].freeze
 
-  def code_breaker
-    player = CodeBreaker.new
-    player.rounds
-  end
-
   def clear
     @pegs.clear
     @guess.clear
@@ -70,10 +65,15 @@ class Game
   def choose_role
     puts 'Enter 1 to be the code-breaker or 2 to be the code-maker.'
     @role = gets.chomp.to_i
-    return if (@role == 1) || (@role == 2)
+    return if role == 1 || role == 2
 
     puts 'Invalid entry.'
     choose_role
+  end
+
+  def code_breaker
+    player = CodeBreaker.new
+    player.rounds
   end
 end
 

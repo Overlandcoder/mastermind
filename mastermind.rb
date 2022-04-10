@@ -103,9 +103,7 @@ class CodeBreaker
   end
 
   def generate_code
-    4.times do
-      @code << COLORS.sample
-    end
+    4.times { @code << COLORS.sample }
     @code_clone = @code.clone
     # delete when code is complete
     p @code
@@ -160,12 +158,16 @@ class CodeMaker
     4.times { @guess << COLORS[num] }
     p @guess
     @guess_clone = @guess.clone
+    guess_again?
+    give_feedback
+    second_level(num) unless game_won?
+  end
+
+  def guess_again?
     if pegs.zero?
       clear
       first_level(num + 1)
     end
-    give_feedback
-    second_level(num) unless game_won?
   end
 
   def second_level(num)

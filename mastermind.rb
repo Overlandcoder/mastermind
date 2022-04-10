@@ -10,7 +10,7 @@ module GameRules
   end
 
   def red_pegs?
-    @code.each_with_index do |_val, idx|
+    @code.each_index do |idx|
       next unless @code[idx] == @guess[idx]
 
       @pegs << 'RED'
@@ -20,7 +20,7 @@ module GameRules
   end
 
   def white_pegs?
-    @code_clone.each_with_index do |val, _idx|
+    @code_clone.each do |val|
       next unless @guess_clone.any?(val)
 
       # If same color is present in code more than once, and the guess contains that
@@ -73,7 +73,7 @@ class Game
 
   def code_breaker
     player = CodeBreaker.new
-    player.rounds
+    player.play_rounds
   end
 end
 
@@ -89,7 +89,7 @@ class CodeBreaker
     generate_code
   end
 
-  def rounds
+  def play_rounds
     5.times do
       clear
       solicit_guess

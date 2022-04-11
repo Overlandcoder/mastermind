@@ -31,7 +31,7 @@ module GameRules
     end
   end
 
-  def give_feedback
+  def display_pegs
     red_pegs?
     white_pegs?
     puts "\n#{@pegs.shuffle.join(' ')}\n "
@@ -53,13 +53,14 @@ class Game
   attr_reader :role
 
   def initialize
-    choose_role
+    # choose_role
     play
   end
 
   def play
-    code_breaker if role == 1
-    code_maker if role == 2
+    # code_breaker if role == 1
+    # code_maker if role == 2
+    code_maker
   end
 
   def choose_role
@@ -94,7 +95,7 @@ class CodeBreaker
       clear
       solicit_guess
       @code_clone = @code.clone
-      give_feedback
+      display_pegs
       if game_won?
         puts "You've guessed the code!"
         break
@@ -156,15 +157,14 @@ class CodeMaker
 
   def first_level(num = 0)
     4.times { @guess << COLORS[num] }
-    p @guess
     @guess_clone = @guess.clone
-    guess_again?
-    give_feedback
+    display_pegs
+    guess_again?(num)
     second_level(num) unless game_won?
   end
 
-  def guess_again?
-    if pegs.zero?
+  def guess_again?(num)
+    if pegs.empty?
       clear
       first_level(num + 1)
     end
@@ -175,13 +175,14 @@ class CodeMaker
     pegs.count.times { @guess << COLORS[num] }
     num += 1
     (4 - pegs.count).times { @guess << COLORS[num] }
-    p @guess
+    initial_pegs = pegs.count
+    @pegs.clear
     @guess_clone = @guess.clone
-    give_feedback
-    return unless count_pegs <= pegs.count
-
-    clear
-    second_level(num + 1)
+    binding.pry
+    display_pegs
+    if initial_pegs >= pegs.count
+      second_level(num + 1)
+    end
   end
 end
 

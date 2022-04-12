@@ -144,6 +144,7 @@ class CodeMaker
       clear
       clone_code
       generate_possible_codes
+      reject_numbers
       initial_guess
       if game_won?
         puts 'The computer has guessed the code.'
@@ -162,12 +163,19 @@ class CodeMaker
 
   def generate_possible_codes
     possible_codes = (1111..6666).to_a
+  end
 
-    possible_codes.delete_if do |num|
-      num.to_s.include?("7") ||
-      num.to_s.include?("8") ||
-      num.to_s.include?("9") ||
-      num.to_s.include?("0")
+  def reject_numbers
+    [7, 8, 9, 0].each do |number_to_delete|
+      possible_codes.delete_if do |num|
+        num.to_s.include?("#{number_to_delete}")
+      end
+    end
+  end
+
+  def numbers_to_colors
+    @guess.each_with_index do |val, idx|
+      @guess[idx] = COLORS[val - 1]
     end
   end
 
@@ -178,10 +186,8 @@ class CodeMaker
     display_pegs
   end
 
-  def numbers_to_colors
-    @guess.each_with_index do |val, idx|
-      @guess[idx] = COLORS[val - 1]
-    end
+  def next_guess
+
   end
 end
 

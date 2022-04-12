@@ -9,6 +9,14 @@ module GameRules
     @code_clone.clear
   end
 
+  def clone_code
+    @code_clone = @code.clone
+  end
+
+  def clone_guess
+    @guess_clone = @guess.clone
+  end
+
   def red_pegs?
     @code.each_index do |idx|
       next unless @code[idx] == @guess[idx]
@@ -94,7 +102,7 @@ class CodeBreaker
     5.times do
       clear
       solicit_guess
-      @code_clone = @code.clone
+      clone_code
       display_pegs
       if game_won?
         puts "You've guessed the code!"
@@ -105,7 +113,7 @@ class CodeBreaker
 
   def generate_code
     4.times { @code << COLORS.sample }
-    @code_clone = @code.clone
+    clone_code
     # delete when code is complete
     p @code
   end
@@ -114,7 +122,7 @@ class CodeBreaker
     puts 'Enter your guess:'
     @guess << gets.chomp.split(' ')
     @guess.flatten!
-    @guess_clone = @guess.clone
+    clone_guess
   end
 end
 
@@ -134,7 +142,7 @@ class CodeMaker
 
     12.times do
       clear
-      @code_clone = @code.clone
+      clone_code
       computer_guess
       if game_won?
         puts 'The computer has guessed the code.'
@@ -147,7 +155,7 @@ class CodeMaker
     puts 'Enter the code that you want the computer to break:'
     @code << gets.chomp.split(' ')
     @code.flatten!
-    @code_clone = @code.clone
+    clone_code
     p @code
   end
 
@@ -157,7 +165,7 @@ class CodeMaker
 
   def find_first_peg(num = 0)
     4.times { @guess << COLORS[num] }
-    @guess_clone = @guess.clone
+    clone_guess
     display_pegs
     guess_again?(num)
     second_level(num) unless game_won?
@@ -176,7 +184,7 @@ class CodeMaker
     (4 - pegs.count).times { @guess << COLORS[num] }
     @initial_pegs = pegs.count
     @pegs.clear
-    @guess_clone = @guess.clone
+    clone_guess
     display_pegs
     third_level(num)
   end

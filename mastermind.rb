@@ -159,45 +159,13 @@ class CodeMaker
     p @code
   end
 
-  def computer_guess
-    find_first_peg
-  end
+  possible_codes = (1111..6666).to_a
 
-  def find_first_peg(num = 0)
-    4.times { @guess << COLORS[num] }
-    clone_guess
-    display_pegs
-    guess_again?(num)
-    second_level(num) unless game_won?
-  end
-
-  def guess_again?(num)
-    if pegs.empty?
-      clear
-      find_first_peg(num + 1)
-    end
-  end
-
-  def second_level(num)
-    (4 - pegs.count).times { @guess.pop }
-    num += 1
-    (4 - pegs.count).times { @guess << COLORS[num] }
-    @initial_pegs = pegs.count
-    @pegs.clear
-    clone_guess
-    display_pegs
-    third_level(num)
-  end
-
-  def third_level(num)
-    if initial_pegs >= pegs.count
-      second_level(num)
-    elsif pegs.count == 4 && !game_won?
-      @guess.sample
-      display_pegs
-    else
-      second_level(num) unless game_won?
-    end
+  possible_codes.delete_if do |num|
+    num.to_s.include?("7") ||
+    num.to_s.include?("8") ||
+    num.to_s.include?("9") ||
+    num.to_s.include?("0")
   end
 end
 

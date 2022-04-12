@@ -121,7 +121,7 @@ end
 class CodeMaker
   include GameRules
 
-  attr_reader :pegs
+  attr_reader :pegs, :initial_pegs
 
   def initialize
     @code = []
@@ -152,10 +152,10 @@ class CodeMaker
   end
 
   def computer_guess
-    first_level
+    find_first_peg
   end
 
-  def first_level(num = 0)
+  def find_first_peg(num = 0)
     4.times { @guess << COLORS[num] }
     @guess_clone = @guess.clone
     display_pegs
@@ -166,22 +166,29 @@ class CodeMaker
   def guess_again?(num)
     if pegs.empty?
       clear
-      first_level(num + 1)
+      find_first_peg(num + 1)
     end
   end
 
   def second_level(num)
-    @guess.clear
-    pegs.count.times { @guess << COLORS[num] }
+    (4 - pegs.count).times { @guess.pop }
     num += 1
     (4 - pegs.count).times { @guess << COLORS[num] }
-    initial_pegs = pegs.count
+    @initial_pegs = pegs.count
     @pegs.clear
     @guess_clone = @guess.clone
-    binding.pry
     display_pegs
+    third_level(num)
+  end
+
+  def third_level(num)
     if initial_pegs >= pegs.count
-      second_level(num + 1)
+      second_level(num)
+    elsif pegs.count == 4 && !game_won?
+      @guess.sample
+      display_pegs
+    else
+      second_level(num) unless game_won?
     end
   end
 end

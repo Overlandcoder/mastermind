@@ -135,11 +135,11 @@ class CodeMaker
     @code = []
     @guess = []
     @pegs = []
+    choose_code
+    computer_guess
   end
 
-  def begin
-    choose_code
-
+  def computer_guess
     12.times do
       clear
       clone_code
@@ -166,10 +166,8 @@ class CodeMaker
   end
 
   def reject_numbers
-    [7, 8, 9, 0].each do |number_to_delete|
-      possible_codes.delete_if do |num|
-        num.to_s.include?("#{number_to_delete}")
-      end
+    [7, 8, 9, 0].each do |num_to_delete|
+      possible_codes.delete_if { |num| num.to_s.include?("#{num_to_delete}") }
     end
   end
 

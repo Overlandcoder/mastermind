@@ -48,7 +48,7 @@ module GameRules
   end
 
   def display_pegs
-    puts "\n#{@pegs.shuffle.join(' ')}\n "
+    puts "\nPegs: #{@pegs.shuffle.join(' ')}\n "
   end
 
   def game_won?
@@ -118,11 +118,11 @@ class CodeBreaker
 
   def generate_code
     4.times { @code << COLORS.sample }
-    p @code
   end
 
   def solicit_guess
     puts 'Enter your guess:'
+    puts '(Example: white red green black)' if @rounds == 1
     @guess << gets.chomp.split(' ')
     @guess.flatten!
   end
@@ -139,19 +139,9 @@ class CodeMaker
     computer_guess
   end
 
-  def computer_guess
-    until game_won? || game_over?
-      initial_guess
-      switch_code_to_guess
-      eliminate_numbers unless game_won?
-      repeat_guesses unless game_won?
-      puts 'The computer has guessed the code.' if game_won?
-      puts "Game over. The computer didn't guess correctly within 12 rounds." if game_over?
-    end
-  end
-
   def choose_code
     puts 'Enter the code that you want the computer to break:'
+    puts '(Example: white red green black)'
     @code << gets.chomp.split(' ')
     @code.flatten!
     clone_code
@@ -168,21 +158,45 @@ class CodeMaker
     end
   end
 
+  def computer_guess
+    find_first_peg(1, 2)
+
+    until game_won? || game_over?
+      switch_code_to_guess
+      eliminate_numbers unless game_won?
+      new_guess unless game_won?
+      puts "The computer has guessed the code in #{@rounds - 1} tries." if game_won?
+      puts "Game over. The computer didn't guess correctly within 12 rounds." if !game_won? && game_over?
+    end
+  end
+
+  def find_first_peg(num1, num2)
+    until red_pegs_count >= 1 || white_pegs_count >= 1
+      initial_guess([num1, num1, num2, num2])
+      num1 += 2
+      num2 += 2
+      find_first_peg(num1, num2)
+      puts "The computer guessed the code in #{@rounds - 1} tr#{@rounds - 1 == 1 ? 'y' : 'ies'}." if game_won?
+    end
+  end
+
+  def initial_guess(guess)
+    @pegs.clear
+    @guess = guess
+    @guess_clone = @guess.clone
+    numbers_to_colors(@guess)
+    puts "Round ##{@rounds}: The computer guesses: #{@guess.join(" ")}"
+    check_pegs
+    display_pegs
+    @original_red_pegs = red_pegs_count
+    @original_white_pegs = white_pegs_count
+    @rounds += 1
+  end
+
   def numbers_to_colors(numbers)
     numbers.each_with_index do |val, idx|
       numbers[idx] = COLORS[val - 1]
     end
-  end
-
-  def initial_guess(guess=[1, 1, 2, 2])
-    @guess = guess
-    @guess_clone = @guess.clone
-    numbers_to_colors(@guess)
-    check_pegs
-    @original_red_pegs = red_pegs_count
-    @original_white_pegs = white_pegs_count
-    @rounds += 1
-    puts @rounds
   end
 
   def switch_code_to_guess
@@ -192,7 +206,7 @@ class CodeMaker
   end
 
   def eliminate_numbers
-    @possible_codes.each do |possible_code|
+    @possible_codes.reverse_each do |possible_code|
       # To turn 1111 into array of 1's
       @guess = possible_code.to_s.split('').map(&:to_i)
       numbers_to_colors(@guess)
@@ -200,14 +214,14 @@ class CodeMaker
       clone_code
       check_pegs
       delete_from_set?(possible_code)
-      break if game_won? || game_over?
+      @pegs.clear
     end
   end
 
-  def repeat_guesses
+  def new_guess
     @pegs.clear
     @code = @original_code
-    @code_clone = @code.clone
+    clone_code
     new_guess = @possible_codes[0].to_s.split('').map(&:to_i)
     initial_guess(new_guess)
   end

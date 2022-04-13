@@ -45,6 +45,10 @@ module GameRules
     @pegs == %w[RED RED RED RED]
   end
 
+  def game_over?
+    @rounds == 13
+  end
+
   def code_maker
     computer = CodeMaker.new
   end
@@ -56,14 +60,14 @@ class Game
   attr_reader :role
 
   def initialize
-    # choose_role
+    choose_role
     play
   end
 
   def play
-    # code_breaker if role == 1
-    # code_maker if role == 2
-    code_maker
+    code_breaker if role == 1
+    code_maker if role == 2
+    # code_maker
   end
 
   def choose_role
@@ -90,19 +94,19 @@ class CodeBreaker
     @code = []
     @guess = []
     @pegs = []
+    @rounds = 1
     generate_code
   end
 
   def play_rounds
-    5.times do
+    until game_won? || game_over?
       clear
       solicit_guess
       clone_code
-      display_pegs(@guess)
-      if game_won?
-        puts "You've guessed the code!"
-        break
-      end
+      display_pegs
+      puts "You've guessed the code!" if game_won?
+      @rounds += 1
+      puts "Game over. You didn't guess correctly within 12 rounds." if game_over?
     end
   end
 
@@ -117,7 +121,6 @@ class CodeBreaker
     puts 'Enter your guess:'
     @guess << gets.chomp.split(' ')
     @guess.flatten!
-    clone_guess
   end
 end
 
@@ -130,24 +133,18 @@ class CodeMaker
     @code = []
     @guess = []
     @pegs = []
+    @rounds = 0
     choose_code
+    generate_possible_codes
+    reject_numbers
     computer_guess
   end
 
   def computer_guess
-    12.times do
-      clear
-      clone_code
-      generate_possible_codes
-      reject_numbers
-      initial_guess
-      switch_guess_code
-      next_guess if !game_won?
-      if game_won?
-        puts 'The computer has guessed the code.'
-        break
-      end
-    end
+    initial_guess
+    switch_guess_code
+    next_guess if !game_won?
+    puts 'The computer has guessed the code.' if game_won?
   end
 
   def choose_code
@@ -175,26 +172,30 @@ class CodeMaker
     end
   end
 
-  def pegs_count
-    @pegs.count
-  end
-
-  def initial_guess
-    @guess = [1, 1, 2, 2]
+  def initial_guess(guess=[1, 1, 2, 2])
+    @guess = guess
+    @guess_clone = @guess.clone
     numbers_to_colors(@guess)
     display_pegs
+    @rounds += 1
   end
 
-  def switch_guess_code
+  def switch_code_to_guess
+    @guess = @guess_clone
     @code = @guess
+    numbers_to_colors(@code)
   end
 
   def next_guess
-    @possible_codes.each_with_index do |code, idx|
-      @guess = code.to_s.split('').map(&:to_i)
-      @guess = numbers_to_colors(@guess)
-      binding.pry
+    @possible_codes.each do |possible_code|
+      @guess = possible_code.to_s.split('').map(&:to_i)
+      numbers_to_colors(@guess)
+      @pegs.clear
+      clone_code
+      puts "Guess: #{@guess} Code: #{@code}"
       display_pegs
+      @rounds += 1
+      break if game_won? || game_over?
     end
   end
 end

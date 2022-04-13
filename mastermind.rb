@@ -131,8 +131,6 @@ end
 class CodeMaker
   include GameRules
 
-  attr_reader :pegs, :initial_pegs
-
   def initialize
     initial_setup
     choose_code

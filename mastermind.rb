@@ -203,6 +203,7 @@ class CodeMaker
     @guess = guess
     @guess_clone = @guess.clone
     numbers_to_colors(@guess)
+    sleep(2)
     puts "Round ##{@rounds}: The computer guesses: #{@guess.join(" ")}"
     check_pegs
     display_pegs

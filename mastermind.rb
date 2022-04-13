@@ -3,6 +3,13 @@ require 'pry-byebug'
 module GameRules
   COLORS = %w[red yellow green blue white black].freeze
 
+  def initial_setup
+    @code = []
+    @guess = []
+    @pegs = []
+    @rounds = 1
+  end
+
   def clear
     @pegs.clear
     @guess.clear
@@ -35,9 +42,12 @@ module GameRules
     end
   end
 
-  def display_pegs
+  def check_pegs
     red_pegs?
     white_pegs?
+  end
+
+  def display_pegs
     puts "\n#{@pegs.shuffle.join(' ')}\n "
   end
 
@@ -60,14 +70,13 @@ class Game
   attr_reader :role
 
   def initialize
-    # choose_role
+    choose_role
     play
   end
 
   def play
-    # code_breaker if role == 1
-    # code_maker if role == 2
-    code_maker
+    code_breaker if role == 1
+    code_maker if role == 2
   end
 
   def choose_role
@@ -91,10 +100,7 @@ class CodeBreaker
   # attr_reader :guess, :pegs
 
   def initialize
-    @code = []
-    @guess = []
-    @pegs = []
-    @rounds = 1
+    initial_setup
     generate_code
   end
 
@@ -130,10 +136,7 @@ class CodeMaker
   attr_reader :pegs, :initial_pegs
 
   def initialize
-    @code = []
-    @guess = []
-    @pegs = []
-    @rounds = 0
+    initial_setup
     choose_code
     generate_possible_codes
     reject_numbers
@@ -141,10 +144,13 @@ class CodeMaker
   end
 
   def computer_guess
-    initial_guess
-    switch_code_to_guess
-    eliminate_numbers if !game_won?
-    puts 'The computer has guessed the code.' if game_won?
+    until game_won?
+      initial_guess
+      switch_code_to_guess
+      eliminate_numbers unless game_won?
+      repeat_guesses unless game_won?
+      puts 'The computer has guessed the code.' if game_won?
+    end
   end
 
   def choose_code
@@ -176,10 +182,11 @@ class CodeMaker
     @guess = guess
     @guess_clone = @guess.clone
     numbers_to_colors(@guess)
-    display_pegs
+    check_pegs
     @original_red_pegs = red_pegs_count
     @original_white_pegs = white_pegs_count
     @rounds += 1
+    puts @rounds
   end
 
   def switch_code_to_guess
@@ -194,15 +201,22 @@ class CodeMaker
       numbers_to_colors(@guess)
       @pegs.clear
       clone_code
-      display_pegs
-      puts @possible_codes.count
+      check_pegs
       delete_from_set?(possible_code)
       break if game_won? || game_over?
     end
   end
 
+  def repeat_guesses
+    @pegs.clear
+    @code = @original_code
+    @code_clone = @code.clone
+    new_guess = @possible_codes[0].to_s.split('').map(&:to_i)
+    initial_guess(new_guess)
+  end
+
   def delete_from_set?(possible_code)
-    @possible_codes.delete(possible_code) if !equal_pegs?
+    @possible_codes.delete(possible_code) unless equal_pegs?
   end
 
   def equal_pegs?

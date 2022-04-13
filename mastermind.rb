@@ -60,14 +60,14 @@ class Game
   attr_reader :role
 
   def initialize
-    choose_role
+    # choose_role
     play
   end
 
   def play
-    code_breaker if role == 1
-    code_maker if role == 2
-    # code_maker
+    # code_breaker if role == 1
+    # code_maker if role == 2
+    code_maker
   end
 
   def choose_role
@@ -142,8 +142,8 @@ class CodeMaker
 
   def computer_guess
     initial_guess
-    switch_guess_code
-    next_guess if !game_won?
+    switch_code_to_guess
+    eliminate_numbers if !game_won?
     puts 'The computer has guessed the code.' if game_won?
   end
 
@@ -177,6 +177,8 @@ class CodeMaker
     @guess_clone = @guess.clone
     numbers_to_colors(@guess)
     display_pegs
+    @original_red_pegs = red_pegs_count
+    @original_white_pegs = white_pegs_count
     @rounds += 1
   end
 
@@ -186,17 +188,33 @@ class CodeMaker
     numbers_to_colors(@code)
   end
 
-  def next_guess
+  def eliminate_numbers
     @possible_codes.each do |possible_code|
       @guess = possible_code.to_s.split('').map(&:to_i)
       numbers_to_colors(@guess)
       @pegs.clear
       clone_code
-      puts "Guess: #{@guess} Code: #{@code}"
       display_pegs
-      @rounds += 1
+      puts @possible_codes.count
+      delete_from_set?(possible_code)
       break if game_won? || game_over?
     end
+  end
+
+  def delete_from_set?(possible_code)
+    @possible_codes.delete(possible_code) if !equal_pegs?
+  end
+
+  def equal_pegs?
+    @original_red_pegs == red_pegs_count && @original_white_pegs == white_pegs_count
+  end
+
+  def red_pegs_count
+    @pegs.count { |peg| peg == 'RED' }
+  end
+
+  def white_pegs_count
+    @pegs.count { |peg| peg == 'WHITE' }
   end
 end
 

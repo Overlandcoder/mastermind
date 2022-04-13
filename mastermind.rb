@@ -127,6 +127,7 @@ class CodeBreaker
     @guess.flatten!
     unless valid_guess?
       puts "Invalid guess, please try again."
+      @guess.clear
       solicit_guess
     end
   end
@@ -142,6 +143,7 @@ class CodeMaker
   def initialize
     initial_setup
     choose_code
+    valid_code?
     generate_possible_codes
     reject_numbers
     computer_guess
@@ -154,6 +156,14 @@ class CodeMaker
     @code.flatten!
     clone_code
     @original_code = @code
+  end
+
+  def valid_code?
+    unless @code.count == 4 && @code.all? { |color| COLORS.include?(color) }
+      puts "Invalid code, please try again."
+      @code.clear
+      choose_code
+    end
   end
 
   def generate_possible_codes

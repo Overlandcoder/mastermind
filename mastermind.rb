@@ -144,7 +144,7 @@ class CodeMaker
   end
 
   def computer_guess
-    until game_won?
+    until game_won? || game_over?
       initial_guess
       switch_code_to_guess
       eliminate_numbers unless game_won?
@@ -159,7 +159,6 @@ class CodeMaker
     @code.flatten!
     clone_code
     @original_code = @code
-    p @code
   end
 
   def generate_possible_codes
@@ -197,6 +196,7 @@ class CodeMaker
 
   def eliminate_numbers
     @possible_codes.each do |possible_code|
+      # To turn 1111 into array of 1's
       @guess = possible_code.to_s.split('').map(&:to_i)
       numbers_to_colors(@guess)
       @pegs.clear

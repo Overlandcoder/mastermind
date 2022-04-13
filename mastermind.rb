@@ -7,7 +7,7 @@ module GameRules
     @code = []
     @guess = []
     @pegs = []
-    @rounds = 1
+    @round = 1
   end
 
   def clear
@@ -56,7 +56,11 @@ module GameRules
   end
 
   def game_over?
-    @rounds == 13
+    @round == 13
+  end
+
+  def code_breaker
+    player = CodeBreaker.new
   end
 
   def code_maker
@@ -87,10 +91,6 @@ class Game
     puts 'Invalid entry.'
     choose_role
   end
-
-  def code_breaker
-    player = CodeBreaker.new
-  end
 end
 
 class CodeBreaker
@@ -111,7 +111,7 @@ class CodeBreaker
       check_pegs
       display_pegs
       puts "You've guessed the code!" if game_won?
-      @rounds += 1
+      @round += 1
       puts "Game over. You didn't guess correctly within 12 rounds." if game_over?
     end
   end
@@ -122,7 +122,7 @@ class CodeBreaker
 
   def solicit_guess
     puts 'Enter your guess:'
-    puts '(Example: white red green black)' if @rounds == 1
+    puts '(Example: white red green black)' if @round == 1
     @guess << gets.chomp.split(' ')
     @guess.flatten!
     unless valid_guess?
@@ -183,7 +183,7 @@ class CodeMaker
       switch_code_to_guess
       eliminate_numbers unless game_won?
       new_guess unless game_won?
-      puts "The computer has guessed the code in #{@rounds - 1} tries." if game_won?
+      puts "The computer has guessed the code in #{@round - 1} tries." if game_won?
       puts "Game over. The computer didn't guess correctly within 12 rounds." if !game_won? && game_over?
     end
   end
@@ -194,7 +194,7 @@ class CodeMaker
       num1 += 2
       num2 += 2
       find_first_peg(num1, num2)
-      puts "The computer guessed the code in #{@rounds - 1} tr#{@rounds - 1 == 1 ? 'y' : 'ies'}." if game_won?
+      puts "The computer guessed the code in #{@round - 1} tr#{@round - 1 == 1 ? 'y' : 'ies'}." if game_won?
     end
   end
 
@@ -203,13 +203,13 @@ class CodeMaker
     @guess = guess
     @guess_clone = @guess.clone
     numbers_to_colors(@guess)
-    sleep(2)
-    puts "Round ##{@rounds}: The computer guesses: #{@guess.join(" ")}"
+    sleep(1.5)
+    puts "Round ##{@round}: The computer guesses: #{@guess.join(" ")}"
     check_pegs
     display_pegs
     @original_red_pegs = red_pegs_count
     @original_white_pegs = white_pegs_count
-    @rounds += 1
+    @round += 1
   end
 
   def numbers_to_colors(numbers)

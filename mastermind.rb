@@ -90,18 +90,17 @@ class Game
 
   def code_breaker
     player = CodeBreaker.new
-    player.play_rounds
   end
 end
 
 class CodeBreaker
   include GameRules
 
-  # attr_reader :guess, :pegs
-
   def initialize
     initial_setup
     generate_code
+    clone_code
+    play_rounds
   end
 
   def play_rounds
@@ -109,6 +108,7 @@ class CodeBreaker
       clear
       solicit_guess
       clone_code
+      check_pegs
       display_pegs
       puts "You've guessed the code!" if game_won?
       @rounds += 1
@@ -118,8 +118,6 @@ class CodeBreaker
 
   def generate_code
     4.times { @code << COLORS.sample }
-    clone_code
-    # delete when code is complete
     p @code
   end
 
@@ -150,6 +148,7 @@ class CodeMaker
       eliminate_numbers unless game_won?
       repeat_guesses unless game_won?
       puts 'The computer has guessed the code.' if game_won?
+      puts "Game over. The computer didn't guess correctly within 12 rounds." if game_over?
     end
   end
 

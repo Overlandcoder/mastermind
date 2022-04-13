@@ -60,11 +60,11 @@ module GameRules
   end
 
   def code_breaker
-    player = CodeBreaker.new
+    CodeBreaker.new
   end
 
   def code_maker
-    computer = CodeMaker.new
+    CodeMaker.new
   end
 end
 
@@ -125,11 +125,11 @@ class CodeBreaker
     puts '(Example: white red green black)' if @round == 1
     @guess << gets.chomp.split(' ')
     @guess.flatten!
-    unless valid_guess?
-      puts "Invalid guess, please try again."
-      @guess.clear
-      solicit_guess
-    end
+    return if valid_guess?
+
+    puts 'Invalid guess, please try again.'
+    @guess.clear
+    solicit_guess
   end
 
   def valid_guess?
@@ -159,11 +159,11 @@ class CodeMaker
   end
 
   def valid_code?
-    unless @code.count == 4 && @code.all? { |color| COLORS.include?(color) }
-      puts "Invalid code, please try again."
-      @code.clear
-      choose_code
-    end
+    return if @code.count == 4 && @code.all? { |color| COLORS.include?(color) }
+
+    puts 'Invalid code, please try again.'
+    @code.clear
+    choose_code
   end
 
   def generate_possible_codes
@@ -172,7 +172,7 @@ class CodeMaker
 
   def reject_numbers
     [7, 8, 9, 0].each do |num_to_delete|
-      @possible_codes.delete_if { |num| num.to_s.include?("#{num_to_delete}") }
+      @possible_codes.delete_if { |num| num.to_s.include?(num_to_delete.to_s) }
     end
   end
 
@@ -204,7 +204,7 @@ class CodeMaker
     @guess_clone = @guess.clone
     numbers_to_colors(@guess)
     sleep(1.5)
-    puts "Round ##{@round}: The computer guesses: #{@guess.join(" ")}"
+    puts "Round ##{@round}: The computer guesses: #{@guess.join(' ')}"
     check_pegs
     display_pegs
     @original_red_pegs = red_pegs_count

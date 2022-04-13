@@ -112,7 +112,10 @@ class CodeBreaker
       display_pegs
       puts "You've guessed the code!" if game_won?
       @round += 1
-      puts "Game over. You didn't guess correctly within 12 rounds." if game_over?
+      if game_over?
+        puts "Game over. You didn't guess correctly within 12 rounds."
+        puts "The code was: #{@code.join(' ')}."
+      end
     end
   end
 

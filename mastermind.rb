@@ -125,6 +125,14 @@ class CodeBreaker
     puts '(Example: white red green black)' if @rounds == 1
     @guess << gets.chomp.split(' ')
     @guess.flatten!
+    unless valid_guess?
+      puts "Invalid guess, please try again."
+      solicit_guess
+    end
+  end
+
+  def valid_guess?
+    @guess.count == 4 && @guess.all? { |color| COLORS.include?(color) }
   end
 end
 
